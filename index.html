@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador Automatizado de Slides</title>
+    <script src="https://cdn.jsdelivr.net/gh/gitbrent/PptxGenJS@3.12.0/dist/pptxgen.bundle.js"></script>
+    
+    <style>
+        :root {
+            --primary-color: #1A365D;
+            --accent-color: #3182CE;
+            --bg-color: #F7FAFC;
+            --card-bg: #FFFFFF;
+            --text-color: #2D3748;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        header {
+            margin-bottom: 25px;
+            border-bottom: 2px solid #E2E8F0;
+            padding-bottom: 15px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin: 0 0 10px 0;
+            font-size: 28px;
+        }
+
+        p {
+            color: #718096;
+            margin: 0;
+            font-size: 15px;
+        }
+
+        .instruction-box {
+            background-color: #EBF8FF;
+            border-left: 4px solid var(--accent-color);
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 0 6px 6px 0;
+            font-size: 14px;
+            color: #2B6CB0;
+        }
+
+        textarea {
+            width: 100%;
+            height: 350px;
+            padding: 15px;
+            border: 1px solid #CBD5E0;
+            border-radius: 8px;
+            font-family: 'Fira Code', 'Courier New', Courier, monospace;
+            font-size: 14px;
+            background-color: #2D3748;
+            color: #F7FAFC;
+            resize: vertical;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
+        }
+
+        button {
+            width: 100%;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        button:hover {
+            background-color: var(--accent-color);
+        }
+
+        button:active {
+            transform: scale(0.99);
+        }
+
+        .status-message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 6px;
+            display: none;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .success { background-color: #C6F6D5; color: #22543D; }
+        .error { background-color: #FED7D7; color: #742A2A; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Gerador de Slides Acadêmicos</h1>
+            <p>Cole o código JavaScript gerado para criar sua apresentação instantaneamente.</p>
+        </header>
+
+        <div class="instruction-box">
+            <strong>⚠️ Atenção ao colar o código:</strong> Certifique-se de que o código use a variável global <code>pptx</code> (já declarada pelo app) e termine chamando a função para salvar, como: <code>pptx.writeFile({ fileName: "aula.pptx" });</code>.
+        </div>
+
+        <textarea id="codeEditor" placeholder="// Cole aqui o código JavaScript gerado pela IA...&#10;// Exemplo:&#10;// let slide = pptx.addSlide();&#10;// slide.addText('Olá Mundo', { x:1, y:1 });&#10;// pptx.writeFile({ fileName: 'MinhaAula.pptx' });"></textarea>
+
+        <button id="generateBtn" onclick="executarCodigoSlides()">
+            📊 Gerar Slides
+        </button>
+
+        <div id="status" class="status-message"></div>
+    </div>
+
+    <script>
+        function executarCodigoSlides() {
+            const codeInput = document.getElementById('codeEditor').value;
+            const statusDiv = document.getElementById('status');
+            
+            // Limpa mensagens anteriores
+            statusDiv.style.display = 'none';
+            statusDiv.className = 'status-message';
+
+            if (!codeInput.trim()) {
+                mostrarStatus('Por favor, cole algum código antes de gerar.', 'error');
+                return;
+            }
+
+            try {
+                // 1. Instancia um novo objeto PptxGenJS no escopo global para o script colado usar
+                window.pptx = new PptxGenJS();
+
+                // 2. Transforma a string de texto em código executável e roda
+                // Usamos uma Função anônima para isolar o ambiente e rodar o script com segurança
+                const usarScript = new Function(codeInput);
+                usarScript();
+
+                mostrarStatus('Processando slides... O download deve começar em instantes!', 'success');
+            } catch (error) {
+                console.error(error);
+                mostrarStatus('Erro na execução do código: ' + error.message, 'error');
+            }
+        }
+
+        function mostrarStatus(mensagem, tipo) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerText = mensagem;
+            statusDiv.classList.add(tipo);
+            statusDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
